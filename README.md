@@ -1,53 +1,120 @@
 ---
 page_type: sample
 languages:
-- csharp
+- java
 products:
-- dotnet
-description: "Add 150 character max description"
-urlFragment: "update-this-to-unique-url-stub"
+- azure
+description: "Securing Open Liberty/WebSphere Liberty Application with Azure Active Directory via OpenID Connect"
+urlFragment: "liberty-aad-oidc"
 ---
 
-# Official Microsoft Sample
+# Securing Open Liberty/WebSphere Liberty Application with Azure Active Directory via OpenID Connect
 
-<!-- 
-Guidelines on README format: https://review.docs.microsoft.com/help/onboard/admin/samples/concepts/readme-template?branch=master
-
-Guidance on onboarding samples to docs.microsoft.com/samples: https://review.docs.microsoft.com/help/onboard/admin/samples/process/onboarding?branch=master
-
-Taxonomies for products and languages: https://review.docs.microsoft.com/new-hope/information-architecture/metadata/taxonomies?branch=master
--->
-
-Give a short description for your sample here. What does it do and why is it important?
-
-## Contents
-
-Outline the file contents of the repository. It helps users navigate the codebase, build configuration and any related assets.
-
-| File/folder       | Description                                |
-|-------------------|--------------------------------------------|
-| `src`             | Sample source code.                        |
-| `.gitignore`      | Define what to ignore at commit time.      |
-| `CHANGELOG.md`    | List of changes to the sample.             |
-| `CONTRIBUTING.md` | Guidelines for contributing to the sample. |
-| `README.md`       | This README file.                          |
-| `LICENSE`         | The license for the sample.                |
+This project demonstrates how to secure your Java EE application on Open Liberty/WebSphere Liberty using Azure Active Directory and OpenID Connect. The following is how you run the demo.
 
 ## Prerequisites
 
-Outline the required components and tools that a user might need to have on their machine in order to run the sample. This can be anything from frameworks, SDKs, OS versions or IDE releases.
+* Install Java SE 8 (we used [AdoptOpenJDK OpenJDK 8 LTS/OpenJ9](https://adoptopenjdk.net)).
+* Install [Maven](https://maven.apache.org/download.cgi) 3.5.0 or higher.
+* Install [Docker](https://docs.docker.com/get-docker/) for your OS.
+* You will need an Azure subscription. If you don't have one, you can get one for free for one year [here](https://azure.microsoft.com/free).
+* Download this repository somewhere in your file system (easiest way might be to download as a zip and extract).
 
-## Setup
+## Setup Azure Active Directory
 
-Explain how to prepare the sample once the user clones or downloads the repository. The section should outline every step necessary to install dependencies and set up any settings (for example, API keys and output folders).
+1. You will first need to [get an Azure Active Directory tenant](https://docs.microsoft.com/azure/active-directory/develop/quickstart-create-new-tenant). It is very likely your Azure account already has a tenant. Please note down your tenant/directory ID.
+2. Although this isn't absolutely necessary, you can [create a few Azure Active Directory users](https://docs.microsoft.com/azure/active-directory/fundamentals/add-users-azure-active-directory). You can use these accounts or your own to test the application. Do note down email addresses and passwords for login.
+3. You will need to [create a new application registration](https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app) in Azure Active Directory. Please specify the redirect URI to be: https://localhost:9443/oidcclient/redirect/liberty-aad-oidc-javaeecafe. Please note down the application (client) ID.
+4. You will need to create a new client secret. In the newly created application registration, find 'Certificates & secrets'. Select 'New client secret'. Provide a description and hit 'Add'. Note down the generated client secret value.
 
-## Running the sample
+## Start the Database instance
 
-Outline step-by-step instructions to execute the sample and see its output. Include steps for executing the sample from the IDE, starting specific services in the Azure portal or anything related to the overall launch of the code.
+The first step to getting the application running is getting the database up. Please follow the instructions below to get the database running.
 
-## Key concepts
+1. Ensure that all running Docker containers are shut down. You may want to do this by restarting Docker. The demo depends on containers started in a specific order.
+2. Make sure Docker is running. Open a console.
+3. Enter the following command and wait for the database to come up fully.
 
-Provide users with more context on the tools and services used in the sample. Explain some of the code that is being used and how services interact with each other.
+   ```bash
+   docker run -it --rm --name javaee-cafe-db -v pgdata:/var/lib/postgresql/data -p 5432:5432 -e POSTGRES_HOST_AUTH_METHOD=trust postgres
+   ```
+
+4. The database is now ready (to stop it, simply press Control-C after the Java EE application is shutdown).
+
+Now we can get the application up and running.  The following steps show two different ways to do so: Docker and maven.
+
+### Start the Application with Docker
+
+1. Download [postgresql-42.2.4.jar](https://repo1.maven.org/maven2/org/postgresql/postgresql/42.2.4/postgresql-42.2.4.jar) and put it into directory where you have this repository downloaded on your local machine.
+2. Open a console. Navigate to the directory of this repository.
+3. Run `mvn clean package --file javaee-cafe/pom.xml`. This will generate a war deployment under `./javaee-cafe/target`.
+4. Build a Docker image tagged `javaee-cafe` by running one of the following commands.
+
+   ```bash
+   # build from open liberty base image
+   docker build -t javaee-cafe --pull .
+   # build from websphere liberty base image
+   docker build -t javaee-cafe --pull --file=Dockerfile-wlp .
+   ```
+
+5. To run the newly built image, execute the following command. These are the parameters required:
+
+   * `POSTGRESQL_SERVER_NAME`: For Mac and Windows users, 'host.docker.internal' may be used. For other operating systems, use the IP 172.17.0.2 (note, this depends on the fact that the database is the first container to start).
+   * `POSTGRESQL_USER`: Use `postgres`.
+   * `POSTGRESQL_PASSWORD`: Keep it empty.
+   * `CLIENT_ID`: The application/client ID you noted down.
+   * `CLIENT_SECRET`: The client secret value you noted down.
+   * `TENANT_ID`: The tenant/directory ID you noted down.
+
+   ```bash
+   docker run -it --rm -p 9080:9080 -p 9443:9443 -e POSTGRESQL_SERVER_NAME=<...> -e POSTGRESQL_USER=postgres -e POSTGRESQL_PASSWORD= -e CLIENT_ID=<...> -e CLIENT_SECRET=<...> -e TENANT_ID=<...> javaee-cafe
+   ```
+
+6. Wait for Liberty to start and the application to deploy successfully (to stop the application and Liberty, simply press Control-C).
+
+### Start the Application with Maven
+
+You can also get the application up and running using the `mvn` command.
+
+1. Open a console. Navigate to where you have this repository downloaded on your local machine.
+2. Run `mvn clean package --file javaee-cafe/pom.xml`.
+3. Execute the following command with required parameters (Windows PowerShell uses a slight variant):
+   * `postgresql.server.name`: Use `localhost`.
+   * `postgresql.user`: Use `postgres`.
+   * `postgresql.password`: Keep it empty.
+   * `client.id`: The application/client ID you noted down.
+   * `client.secret`: The client secret value you noted down.
+   * `tenant.id`: The tenant/directory ID you noted down.
+
+   ```bash
+   mvn -Dpostgresql.server.name=localhost -Dpostgresql.user=postgres -Dpostgresql.password= -Dclient.id=<...> -Dclient.secret=<...> -Dtenant.id=<...> liberty:run --file javaee-cafe/pom.xml
+   ```
+
+4. Note: if you want to run from Windows PowerShell, please use the following command:
+
+   ```bash
+   mvn --file javaee-cafe/pom.xml liberty:run "-Dpostgresql.server.name=localhost" "-Dpostgresql.user=postgres" "-Dpostgresql.password=" "-Dclient.id=<...>" "-Dclient.secret=<...>" "-Dtenant.id=<...>"
+   ```
+
+5. Wait for Liberty to start and the application to deploy successfully (to stop the application and Liberty, simply press Control-C).
+
+### Visit the Application
+
+Once the application starts, you can visit the JSF client at:
+
+* [https://localhost:9443/javaee-cafe](https://localhost:9443/javaee-cafe)
+* [http://localhost:9080/javaee-cafe](http://localhost:9080/javaee-cafe)
+
+## References
+
+* [Configuring an OpenID Connect Client in Liberty](https://www.ibm.com/support/knowledgecenter/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/twlp_config_oidc_rp.html)
+* [Enabling SSL communication in Liberty](https://www.ibm.com/support/knowledgecenter/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/twlp_sec_ssl.html)
+* [Configuring authorization for applications in Liberty](https://www.ibm.com/support/knowledgecenter/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/twlp_sec_rolebased.html)
+* [SSL configuration values in Open Liberty](https://openliberty.io/docs/ref/config/#ssl.html)
+
+## Future Considerations
+
+* Applying JWT propagated from the initial login to secure internal REST calls.
 
 ## Contributing
 
