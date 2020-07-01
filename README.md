@@ -24,8 +24,10 @@ This project demonstrates how to secure your Java EE application on Open Liberty
 
 1. You will first need to [get an Azure Active Directory tenant](https://docs.microsoft.com/azure/active-directory/develop/quickstart-create-new-tenant). It is very likely your Azure account already has a tenant. Please note down your tenant/directory ID.
 2. Although this isn't absolutely necessary, you can [create a few Azure Active Directory users](https://docs.microsoft.com/azure/active-directory/fundamentals/add-users-azure-active-directory). You can use these accounts or your own to test the application. Do note down email addresses and passwords for login.
-3. You will need to [create a new application registration](https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app) in Azure Active Directory. Please specify the redirect URI to be: https://localhost:9443/oidcclient/redirect/liberty-aad-oidc-javaeecafe. Please note down the application (client) ID.
-4. You will need to create a new client secret. In the newly created application registration, find 'Certificates & secrets'. Select 'New client secret'. Provide a description and hit 'Add'. Note down the generated client secret value.
+3. You will need to create an admin group to enable JWT RBAC (role-based-access-control) functionality. Follow [create a basic group and add members using Azure Active Directory](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-groups-create-azure-portal) to create a group with type as **Security** and add one or more members. Note down the group ID.
+4. You will need to [create a new application registration](https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app) in Azure Active Directory. Please specify the redirect URI to be: https://localhost:9443/oidcclient/redirect/liberty-aad-oidc-javaeecafe. Please note down the application (client) ID.
+5. You will need to create a new client secret. In the newly created application registration, find 'Certificates & secrets'. Select 'New client secret'. Provide a description and hit 'Add'. Note down the generated client secret value.
+6. You will need to add a **groups claim** into the ID token. In the newly created application registration, find 'Token configuration'. Click 'Add groups claim'. Select 'Security groups' as group types to include in the ID token. Expand 'ID' and select 'Group ID' in the 'Customize token properties by type' section.
 
 ## Start the Database instance
 
@@ -46,7 +48,7 @@ Now we can get the application up and running.  The following steps show two dif
 ### Start the Application with Docker
 
 1. Download [postgresql-42.2.4.jar](https://repo1.maven.org/maven2/org/postgresql/postgresql/42.2.4/postgresql-42.2.4.jar) and put it into directory where you have this repository downloaded on your local machine.
-2. Open a console. Navigate to the directory of this repository.
+2. Open a console. Navigate to where you have this repository downloaded on your local machine.
 3. Run `mvn clean package --file javaee-cafe/pom.xml`. This will generate a war deployment under `./javaee-cafe/target`.
 4. Build a Docker image tagged `javaee-cafe` by running one of the following commands.
 
@@ -65,9 +67,10 @@ Now we can get the application up and running.  The following steps show two dif
    * `CLIENT_ID`: The application/client ID you noted down.
    * `CLIENT_SECRET`: The client secret value you noted down.
    * `TENANT_ID`: The tenant/directory ID you noted down.
+   * `ADMIN_GROUP_ID`: The admin group ID you noted down.
 
    ```bash
-   docker run -it --rm -p 9080:9080 -p 9443:9443 -e POSTGRESQL_SERVER_NAME=<...> -e POSTGRESQL_USER=postgres -e POSTGRESQL_PASSWORD= -e CLIENT_ID=<...> -e CLIENT_SECRET=<...> -e TENANT_ID=<...> javaee-cafe
+   docker run -it --rm -p 9080:9080 -p 9443:9443 -e POSTGRESQL_SERVER_NAME=<...> -e POSTGRESQL_USER=postgres -e POSTGRESQL_PASSWORD= -e CLIENT_ID=<...> -e CLIENT_SECRET=<...> -e TENANT_ID=<...> -e ADMIN_GROUP_ID=<...> javaee-cafe
    ```
 
 6. Wait for Liberty to start and the application to deploy successfully (to stop the application and Liberty, simply press Control-C).
@@ -85,25 +88,28 @@ You can also get the application up and running using the `mvn` command.
    * `client.id`: The application/client ID you noted down.
    * `client.secret`: The client secret value you noted down.
    * `tenant.id`: The tenant/directory ID you noted down.
+   * `admin.group.id`: The admin group ID you noted down.
 
    ```bash
-   mvn -Dpostgresql.server.name=localhost -Dpostgresql.user=postgres -Dpostgresql.password= -Dclient.id=<...> -Dclient.secret=<...> -Dtenant.id=<...> liberty:run --file javaee-cafe/pom.xml
+   mvn -Dpostgresql.server.name=localhost -Dpostgresql.user=postgres -Dpostgresql.password= -Dclient.id=<...> -Dclient.secret=<...> -Dtenant.id=<...> -Dadmin.group.id=<...> liberty:run --file javaee-cafe/pom.xml
    ```
 
 4. Note: if you want to run from Windows PowerShell, please use the following command:
 
    ```bash
-   mvn --file javaee-cafe/pom.xml liberty:run "-Dpostgresql.server.name=localhost" "-Dpostgresql.user=postgres" "-Dpostgresql.password=" "-Dclient.id=<...>" "-Dclient.secret=<...>" "-Dtenant.id=<...>"
+   mvn --file javaee-cafe/pom.xml liberty:run "-Dpostgresql.server.name=localhost" "-Dpostgresql.user=postgres" "-Dpostgresql.password=" "-Dclient.id=<...>" "-Dclient.secret=<...>" "-Dtenant.id=<...>" "-Dadmin.group.id=<...>"
    ```
 
 5. Wait for Liberty to start and the application to deploy successfully (to stop the application and Liberty, simply press Control-C).
 
 ### Visit the Application
 
-Once the application starts, you can visit the JSF client at:
+1. Once the application starts, you can visit the JSF client at
 
-* [https://localhost:9443/javaee-cafe](https://localhost:9443/javaee-cafe)
-* [http://localhost:9080/javaee-cafe](http://localhost:9080/javaee-cafe)
+   * [https://localhost:9443/javaee-cafe](https://localhost:9443/javaee-cafe)
+   * [http://localhost:9080/javaee-cafe](http://localhost:9080/javaee-cafe)
+2. Logging in as a user who doesn't belong to the admin group, you won't be allowed to remove coffee entries as the **Delete** button will be disabled.
+3. Logging in as a user who does belong to the admin group, you will be allowed to remove coffee entries as the **Delete** coffee button will be enabled.
 
 ## References
 
@@ -111,10 +117,8 @@ Once the application starts, you can visit the JSF client at:
 * [Enabling SSL communication in Liberty](https://www.ibm.com/support/knowledgecenter/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/twlp_sec_ssl.html)
 * [Configuring authorization for applications in Liberty](https://www.ibm.com/support/knowledgecenter/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/twlp_sec_rolebased.html)
 * [SSL configuration values in Open Liberty](https://openliberty.io/docs/ref/config/#ssl.html)
-
-## Future Considerations
-
-* Applying JWT propagated from the initial login to secure internal REST calls.
+* [Building and consuming JSON Web Token (JWT) tokens in Liberty](https://www.ibm.com/support/knowledgecenter/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/twlp_sec_config_jwt.html)
+* [Configuring the MicroProfile JSON Web Token](https://www.ibm.com/support/knowledgecenter/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/twlp_sec_json.html)
 
 ## Contributing
 
