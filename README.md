@@ -45,7 +45,7 @@ The first step to getting the application running is getting the database up. Pl
 
 Now we can get the application up and running.  The following steps show two different ways to do so: Docker and maven.
 
-### Start the Application with Docker
+## Start the Application with Docker
 
 1. Download [postgresql-42.2.4.jar](https://repo1.maven.org/maven2/org/postgresql/postgresql/42.2.4/postgresql-42.2.4.jar) and put it into directory where you have this repository downloaded on your local machine.
 2. Open a console. Navigate to where you have this repository downloaded on your local machine.
@@ -75,7 +75,7 @@ Now we can get the application up and running.  The following steps show two dif
 
 6. Wait for Liberty to start and the application to deploy successfully (to stop the application and Liberty, simply press Control-C).
 
-### Start the Application with Maven
+## Start the Application with Maven
 
 You can also get the application up and running using the `mvn` command.
 
@@ -102,7 +102,7 @@ You can also get the application up and running using the `mvn` command.
 
 5. Wait for Liberty to start and the application to deploy successfully (to stop the application and Liberty, simply press Control-C).
 
-### Visit the Application
+## Visit the Application
 
 1. Once the application starts, you can visit the JSF client at
 
