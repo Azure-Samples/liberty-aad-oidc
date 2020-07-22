@@ -25,8 +25,7 @@
         clientSecret="${client.secret}"
         discoveryEndpointUrl="https://login.microsoftonline.com/${tenant.id}/v2.0/.well-known/openid-configuration"
         signatureAlgorithm="RS256"
-        userIdentityToCreateSubject="preferred_username"
-        inboundPropagation="supported" />
+        userIdentityToCreateSubject="preferred_username" />
     
     <!-- JWT builder -->
     <jwtBuilder id="jwtAuthUserBuilder" keyAlias="default" issuer="https://example.com" expiresInSeconds="600" />
