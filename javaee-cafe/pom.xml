@@ -95,7 +95,6 @@
                   <goal>create</goal>
                   <goal>install-feature</goal>
                   <goal>deploy</goal>
-                  <goal>package</goal>
                 </goals>
                 <configuration>
                   <outputDirectory>target/wlp-package</outputDirectory>
