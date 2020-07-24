@@ -25,7 +25,7 @@ This project demonstrates how to secure your Java EE application on Open Liberty
 1. You will first need to [get an Azure Active Directory tenant](https://docs.microsoft.com/azure/active-directory/develop/quickstart-create-new-tenant). It is very likely your Azure account already has a tenant. Please note down your tenant/directory ID.
 2. Although this isn't absolutely necessary, you can [create a few Azure Active Directory users](https://docs.microsoft.com/azure/active-directory/fundamentals/add-users-azure-active-directory). You can use these accounts or your own to test the application. Do note down email addresses and passwords for login.
 3. You will need to create an admin group to enable JWT RBAC (role-based-access-control) functionality. Follow [create a basic group and add members using Azure Active Directory](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-groups-create-azure-portal) to create a group with type as **Security** and add one or more members. Note down the group ID.
-4. You will need to [create a new application registration](https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app) in Azure Active Directory. Please specify the redirect URI to be: https://localhost:9443/oidcclient/redirect/liberty-aad-oidc-javaeecafe. Please note down the application (client) ID.
+4. You will need to [create a new application registration](https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app) in Azure Active Directory. Please specify the redirect URI to be: [https://localhost:9443/ibm/api/social-login/redirect/liberty-aad-oidc-javaeecafe](https://localhost:9443/ibm/api/social-login/redirect/liberty-aad-oidc-javaeecafe). Please note down the application (client) ID.
 5. You will need to create a new client secret. In the newly created application registration, find 'Certificates & secrets'. Select 'New client secret'. Provide a description and hit 'Add'. Note down the generated client secret value.
 6. You will need to add a **groups claim** into the ID token. In the newly created application registration, find 'Token configuration'. Click 'Add groups claim'. Select 'Security groups' as group types to include in the ID token. Expand 'ID' and select 'Group ID' in the 'Customize token properties by type' section.
 
@@ -113,11 +113,10 @@ You can also get the application up and running using the `mvn` command.
 
 ## References
 
-* [Configuring an OpenID Connect Client in Liberty](https://www.ibm.com/support/knowledgecenter/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/twlp_config_oidc_rp.html)
+* [Configure social login as OpenID Connect client](https://www.ibm.com/support/knowledgecenter/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/twlp_sec_sociallogin.html#twlp_sec_sociallogin__openid)
 * [Enabling SSL communication in Liberty](https://www.ibm.com/support/knowledgecenter/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/twlp_sec_ssl.html)
 * [Configuring authorization for applications in Liberty](https://www.ibm.com/support/knowledgecenter/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/twlp_sec_rolebased.html)
 * [SSL configuration values in Open Liberty](https://openliberty.io/docs/ref/config/#ssl.html)
-* [Building and consuming JSON Web Token (JWT) tokens in Liberty](https://www.ibm.com/support/knowledgecenter/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/twlp_sec_config_jwt.html)
 * [Configuring the MicroProfile JSON Web Token](https://www.ibm.com/support/knowledgecenter/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/twlp_sec_json.html)
 
 ## Contributing
