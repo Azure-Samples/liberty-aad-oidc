@@ -104,7 +104,7 @@ You can also get the application up and running using the `mvn` command.
 
 ## Visit the Application
 
-1. Once the application starts, you can visit the JSF client at
+1. Once the application starts, you can visit the JSF client at:
 
    * [https://localhost:9443/javaee-cafe](https://localhost:9443/javaee-cafe)
    * [http://localhost:9080/javaee-cafe](http://localhost:9080/javaee-cafe)
