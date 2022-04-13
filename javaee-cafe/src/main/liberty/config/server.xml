@@ -61,7 +61,7 @@
 
     <library id="postgresql-library">
         <fileset dir="${shared.resource.dir}"
-            id="PostgreSQLFileset" includes="postgresql-42.2.4.jar" />
+            id="PostgreSQLFileset" includes="postgresql-42.3.3.jar" />
     </library>
 
     <webApplication id="javaee-cafe"
