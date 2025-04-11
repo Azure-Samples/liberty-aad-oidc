@@ -47,7 +47,7 @@ Now we can get the application up and running.  The following steps show two dif
 
 ## Start the Application with Docker
 
-1. Download [postgresql-42.3.3.jar](https://repo1.maven.org/maven2/org/postgresql/postgresql/42.3.3/postgresql-42.3.3.jar) and put it into directory where you have this repository downloaded on your local machine.
+1. Download [postgresql-42.3.9.jar](https://repo1.maven.org/maven2/org/postgresql/postgresql/42.3.9/postgresql-42.3.9.jar) and put it into directory where you have this repository downloaded on your local machine.
 2. Open a console. Navigate to where you have this repository downloaded on your local machine.
 3. Run `mvn clean package --file javaee-cafe/pom.xml`. This will generate a war deployment under `./javaee-cafe/target`.
 4. Build a Docker image tagged `javaee-cafe` by running one of the following commands.
